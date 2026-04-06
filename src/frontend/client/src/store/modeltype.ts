@@ -9,7 +9,7 @@ const modelType = atomWithLocalStorage('modelType', '');
 const searchType = atomWithLocalStorage('searchType', '');
 const isSearch = atomWithLocalStorage('isSearch', false);
 
-const chatModel = atomWithLocalStorage('chatModel', { id: 0, name: '' });
+const chatModel = atomWithLocalStorage('chatModel', { id: '', name: '' });
 
 const selectedOrgKbs = atom<SelectedOrgKb[]>({
   key: 'selectedOrgKbs',

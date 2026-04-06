@@ -250,8 +250,8 @@ export default function AgentCenter() {
             <div className="sticky top-0 z-40 bg-background">
                 <div className="container mx-auto px-6 py-6">
                     <div className="mt-2">
-                        <h1 className="text-blue-600 text-[32px] truncate max-w-[600px] font-medium mb-2">{bsConfig?.applicationCenterWelcomeMessage || localize('com_app_center_welcome')}</h1>
-                        <p className="text-muted-foreground text-base truncate max-w-[600px]">{bsConfig?.applicationCenterDescription || localize('com_app_center_description')}</p>
+                        <h1 className="text-blue-600 text-[32px] truncate max-w-[600px] font-medium mb-2">{localize(bsConfig?.applicationCenterWelcomeMessage || 'com_app_center_welcome')}</h1>
+                        <p className="text-muted-foreground text-base truncate max-w-[600px]">{localize(bsConfig?.applicationCenterDescription || 'com_app_center_description')}</p>
                     </div>
                     <div className="mt-12 flex items-start justify-between">
                         <AgentNavigation onCategoryChange={handleCategoryChange} onRefresh={refreshAgentData} />

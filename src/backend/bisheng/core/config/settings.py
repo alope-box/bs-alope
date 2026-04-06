@@ -259,6 +259,12 @@ class Settings(BaseModel):
 
     license_str: Optional[str] = None  # license Contents
 
+    @model_validator(mode='after')
+    def set_celery_fallback(self) -> 'Settings':
+        if not self.celery_redis_url:
+            self.celery_redis_url = self.redis_url
+        return self
+
     @field_validator('database_url')
     @classmethod
     def set_database_url(cls, value):

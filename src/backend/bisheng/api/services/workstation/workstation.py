@@ -12,7 +12,8 @@ from pydantic import field_validator
 from bisheng.api.services.base import BaseService
 from bisheng.api.services.knowledge import KnowledgeService
 from bisheng.api.v1.schema.chat_schema import UseKnowledgeBaseParam
-from bisheng.api.v1.schemas import KnowledgeFileOne, KnowledgeFileProcess, WorkstationConfig
+from bisheng.api.v1.schemas import KnowledgeFileOne, KnowledgeFileProcess, WorkstationConfig, WSModel
+from bisheng.llm.domain.const import LLMModelType
 from bisheng.common.dependencies.user_deps import UserPayload
 from bisheng.common.errcode.server import EmbeddingModelStatusError
 from bisheng.common.models.config import Config, ConfigDao, ConfigKeyEnum
@@ -96,13 +97,47 @@ class WorkStationService(BaseService):
     def get_config(cls) -> WorkstationConfig | None:
         """ Get the default configuration of the workbench """
         config = ConfigDao.get_config(ConfigKeyEnum.WORKSTATION)
-        return cls.parse_config(config)
+        ret = cls.parse_config(config)
+        if not ret:
+            ret = WorkstationConfig(models=[], maxTokens=4096)
+        if not ret.models or len(ret.models) == 0:
+            from bisheng.llm.domain.services import LLMService
+            # In sync context, we use a helper to get the data
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor() as pool:
+                        llm_servers = pool.submit(lambda: asyncio.run(LLMService.get_all_llm())).result()
+                else:
+                    llm_servers = asyncio.run(LLMService.get_all_llm())
+            except Exception:
+                # Fallback if loop management is complex
+                llm_servers = []
+
+            ret.models = []
+            for server in llm_servers:
+                for model in server.models:
+                    if model.model_type == LLMModelType.LLM.value and model.online:
+                        ret.models.append(WSModel(id=str(model.id), name=model.model_name, displayName=model.model_name))
+        return ret
 
     @classmethod
     async def aget_config(cls) -> WorkstationConfig | None:
         """ Get the default configuration of the workbench asynchronously """
         config = await ConfigDao.aget_config(ConfigKeyEnum.WORKSTATION)
-        return cls.parse_config(config)
+        ret = cls.parse_config(config)
+        if not ret:
+            ret = WorkstationConfig(models=[], maxTokens=4096)
+        if not ret.models or len(ret.models) == 0:
+            from bisheng.llm.domain.services import LLMService
+            llm_servers = await LLMService.get_all_llm()
+            ret.models = []
+            for server in llm_servers:
+                for model in server.models:
+                    if model.model_type == LLMModelType.LLM.value and model.online:
+                        ret.models.append(WSModel(id=str(model.id), name=model.model_name, displayName=model.model_name))
+        return ret
 
     @classmethod
     def uploadPersonalKnowledge(

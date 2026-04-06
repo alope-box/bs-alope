@@ -2,6 +2,12 @@ FROM dataelement/bisheng-backend:base.v8
 
 WORKDIR /app
 
+# --- 使用阿里云镜像源配置 ---
+ENV PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+ENV UV_PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+ENV UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple/
+# -------------------------
+
 COPY ./ ./
 
 # 生成并安装依赖

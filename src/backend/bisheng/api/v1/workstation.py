@@ -139,11 +139,11 @@ async def final_message(conversation: MessageSession, title: str, requestMessage
 
 
 @router.get('/config', summary='Get workbench configuration', response_model=UnifiedResponseModel)
-def get_config(
+async def get_config(
         request: Request,
         login_user: UserPayload = Depends(UserPayload.get_login_user)):
     """ Get model configurations related to reviews """
-    ret = WorkStationService.get_config()
+    ret = await WorkStationService.aget_config()
 
     etl_for_lm_url = bisheng_settings.get_knowledge().etl4lm.url
     ret = ret.model_dump() if ret else {}
@@ -158,7 +158,7 @@ def get_config(
 
 
 @router.post('/config', summary='Update workbench configuration', response_model=UnifiedResponseModel)
-def update_config(
+async def update_config(
         request: Request,
         login_user: UserPayload = Depends(UserPayload.get_admin_user),
         data: WorkstationConfig = Body(..., description='Default Model Configuration'),

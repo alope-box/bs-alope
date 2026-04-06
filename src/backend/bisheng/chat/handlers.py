@@ -227,6 +227,7 @@ class Handler:
         # Process the graph data and chat message
         chat_inputs = payload.pop('inputs', {})
         chat_inputs.pop('id', '')
+        system_prompt = payload.pop('system_prompt', None)
         is_begin = payload.get('is_begin', True)
         key = get_cache_key(client_id, chat_id)
 
@@ -241,6 +242,7 @@ class Handler:
             is_bot=not is_begin,
             type='bot',
             user_id=user_id,
+            system_prompt=system_prompt,
         )
         if is_begin:
             # FROMfile auto trigger process_message， the question already saved

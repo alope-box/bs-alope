@@ -15,7 +15,7 @@ import { useInterruptAudio } from '../Voice/textToSpeechStore';
 import ConvoStarter from './ConvoStarter';
 import SegmentSelector from './SegmentSelector';
 
-export default function Landing({ Header, isNew, lingsi, lingsiEntry, setLingsi }: { Header?: ReactNode; isNew?: boolean, lingsi: boolean }) {
+export default function Landing({ Header, isNew, lingsi, lingsiEntry, setLingsi }: { Header?: ReactNode; isNew?: boolean, lingsi: boolean, lingsiEntry: boolean, setLingsi: (bl: boolean) => void }) {
   const { conversation } = useChatContext();
   const agentsMap = useAgentsMapContext();
   const assistantMap = useAssistantsMapContext();
@@ -100,13 +100,13 @@ export default function Landing({ Header, isNew, lingsi, lingsiEntry, setLingsi 
       <div className="absolute left-0 right-0">{Header != null ? Header : null}</div>
       <div className="flex h-full flex-col items-center justify-center">
         <div className='flex items-center gap-4'>
-          {bsConfig?.assistantIcon.image && <img className="overflow w-[52px]" src={__APP_ENV__.BASE_URL + bsConfig?.assistantIcon.image} />}
+          {bsConfig?.assistantIcon?.image && <img className="overflow w-[52px]" src={__APP_ENV__.BASE_URL + bsConfig.assistantIcon.image} />}
           <h2 className="max-w-[75vh] px-12 text-center text-lg font-medium dark:text-white md:px-0 md:text-2xl">
-            {bsConfig?.welcomeMessage}
+            {localize(bsConfig?.welcomeMessage || '')}
           </h2>
         </div>
         <div className="max-w-lg text-center mt-4 text-sm font-normal text-gray-500">
-          {bsConfig?.functionDescription}
+          {localize(bsConfig?.functionDescription || '')}
         </div>
 
         {/* 引导词 */}

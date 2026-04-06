@@ -63,6 +63,7 @@ class APIChatCompletion(BaseModel):
     isContinued: Optional[bool] = False
     model: str
     text: Optional[str] = ''
+    system_prompt: Optional[str] = None
     search_enabled: Optional[bool] = False
     use_knowledge_base: Optional[UseKnowledgeBaseParam] = None
     files: Optional[List[Dict]] = None

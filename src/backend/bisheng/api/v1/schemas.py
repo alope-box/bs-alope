@@ -109,6 +109,7 @@ class AddChatMessages(BaseModel):
     chat_id: str  # SessionsID
     human_message: str = None  # User Questions
     answer_message: str = None  # Execution Status
+    system_prompt: Optional[str] = None
 
 
 class ChatList(BaseModel):
@@ -154,6 +155,7 @@ class ChatMessage(BaseModel):
     extra: Optional[str | dict] = '{}'
     flow_id: Optional[str] = None
     chat_id: Optional[str] = None
+    system_prompt: Optional[str] = None
 
 
 class ChatResponse(ChatMessage):

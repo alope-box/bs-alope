@@ -25,12 +25,12 @@ export default defineConfig(({ command }) => ({
     strictPort: false,
     proxy: {
       // '^/api/': {
-      //   target: 'http://192.168.106.116:7861',
+      //   target: 'http://127.0.0.1:7861',
       //   // target: 'http://localhost:3080',
       //   changeOrigin: true,
       // },
       '^(/workspace)?/bisheng': {
-        target: "http://192.168.106.120:3002",
+        target: "http://127.0.0.1:3001",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => {
@@ -38,7 +38,7 @@ export default defineConfig(({ command }) => ({
         },
       },
       '/workspace/api': {
-        target: 'http://192.168.106.120:3002',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
         ws: true,
@@ -52,7 +52,7 @@ export default defineConfig(({ command }) => ({
         },
       },
       '/workspace/tmp-dir': {
-        target: 'http://192.168.106.120:3002',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => {

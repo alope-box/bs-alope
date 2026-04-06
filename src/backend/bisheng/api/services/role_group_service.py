@@ -22,7 +22,7 @@ from bisheng.database.models.group_resource import GroupResourceDao, ResourceTyp
 from bisheng.database.models.role import RoleDao
 from bisheng.database.models.user_group import UserGroupCreate, UserGroupDao, UserGroupRead
 from bisheng.knowledge.domain.models.knowledge import KnowledgeDao
-from bisheng.telemetry_search.domain.services.dashboard import DashboardService
+# from bisheng.telemetry_search.domain.services.dashboard import DashboardService
 from bisheng.tool.domain.models.gpts_tools import GptsToolsDao
 from bisheng.user.domain.models.user import User, UserDao
 from bisheng.user.domain.models.user_role import UserRoleDao
@@ -359,7 +359,8 @@ class RoleGroupService():
         res = []
         dashboard_ids = [int(resource.third_id) for resource in resource_list]
         # Query Dashboard
-        data = await DashboardService.get_simple_dashboards(keyword=keyword, filter_ids=dashboard_ids)
+        # data = await DashboardService.get_simple_dashboards(keyword=keyword, filter_ids=dashboard_ids)
+        data = []
 
         user_map = await self.aget_user_map(set([one.user_id for one in data]))
         for one in data:

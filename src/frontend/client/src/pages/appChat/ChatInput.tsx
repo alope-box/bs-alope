@@ -13,7 +13,13 @@ import { useFileDropAndPaste } from "./useFileDropAndPaste";
 
 export default function ChatInput({ readOnly, v }) {
     const [bishengConfig] = useRecoilState(bishengConfState);
-    const { inputDisabled, error: inputMsg, showUpload, showStop, showReRun } = useRecoilValue(currentRunningState);
+    const { inputDisabled, error: inputMsg, showUpload, showStop, showReRun } = useRecoilValue(currentRunningState) || {
+        inputDisabled: true,
+        error: { code: '', data: null },
+        showUpload: false,
+        showStop: false,
+        showReRun: false,
+    };
     // useAreaText
     const { accepts, inputRef, setChatFiles, handleInput, handleRestart, handleSendClick, handleStopClick } = useAreaText();
 
@@ -21,7 +27,7 @@ export default function ChatInput({ readOnly, v }) {
     const [audioOpening] = useRecordingAudioLoading();
     const localize = useLocalize();
     const { data: modelData } = useGetWorkbenchModelsQuery();
-    const showVoice = modelData?.asr_model.id;
+    const showVoice = modelData?.asr_model?.id;
 
     const inputFilesRef = useRef(null);
 

@@ -555,11 +555,12 @@ export const useGetWorkbenchModelsQuery = () => {
     queryKey: [QueryKeys.getWorkspaceModel],
     queryFn: () => getWorkbenchModelListApi(),
     select(data) {
-      if (data && !data.data.asr_model) {
+      if (data && !data.data?.asr_model) {
         // Compatible with historical data 
-        data.data.asr_model = {}
-      } else if (data && !data.data.tts_model) {
-        data.data.tts_model = {}
+        if (data.data) data.data.asr_model = {}
+      }
+      if (data && !data.data?.tts_model) {
+        if (data.data) data.data.tts_model = {}
       }
       return data?.data;
     },

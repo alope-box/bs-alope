@@ -14,16 +14,16 @@ import svgr from "vite-plugin-svgr";
 const app_env = { BASE_URL: '' } // /custom
 
 // Use environment variable to determine the target.
-//  const target = process.env.VITE_PROXY_TARGET || "http://127.0.0.1:7860";
-const target = process.env.VITE_PROXY_TARGET || "http://192.168.106.120:3002";
-const fileServiceTarget = "http://192.168.106.116:9000";
+const target = process.env.VITE_PROXY_TARGET || "http://localhost:7860";
+// const target = process.env.VITE_PROXY_TARGET || "http://10.6.78.221:3001";
+const fileServiceTarget = "http://10.6.78.221:9100";
 
 // 公共代理配置
 const commonProxyOptions = {
   changeOrigin: true,
   withCredentials: true,
   secure: false,
-  ws: true
+  ws: false
 };
 
 // 带重写功能的配置生成器
@@ -140,6 +140,12 @@ export default defineConfig(() => {
       port: 3001,
       proxy: {
         ...proxyTargets,
+        // 本地开发：将 /workspace/ 转发到 client 开发服务器 (port 4001)
+        '/workspace': {
+          target: 'http://localhost:4001',
+          changeOrigin: true,
+          ws: true,
+        },
       },
     },
   };

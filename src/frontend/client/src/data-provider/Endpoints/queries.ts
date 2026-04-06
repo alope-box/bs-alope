@@ -50,11 +50,13 @@ export const useGetBsConfig = (
     [QueryKeys.bishengConfig],
     () => dataService.getBishengConfig().then(data => {
       // 更新favicon
-      const favicon = document.createElement('link');
-      favicon.type = 'image/x-icon';
-      favicon.rel = 'shortcut icon';
-      favicon.href = __APP_ENV__.BASE_URL + data.assistantIcon.image;
-      document.head.appendChild(favicon);
+      if (data?.assistantIcon?.image) {
+        const favicon = document.createElement('link');
+        favicon.type = 'image/x-icon';
+        favicon.rel = 'shortcut icon';
+        favicon.href = __APP_ENV__.BASE_URL + data.assistantIcon.image;
+        document.head.appendChild(favicon);
+      }
       return data;
     }),
     {

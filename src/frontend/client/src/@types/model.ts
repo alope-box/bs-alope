@@ -6,8 +6,8 @@ export interface ModelInfo {
 }
 
 export interface SelectModel {
-    task_model: ModelInfo;
-    embedding_model: ModelInfo;
+    task_model: ModelInfo[];
+    embedding_model: ModelInfo[];
     linsight_executor_mode: string;
     asr_model: ModelInfo;
     tts_model: ModelInfo;

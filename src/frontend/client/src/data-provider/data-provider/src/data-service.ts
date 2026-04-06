@@ -274,28 +274,120 @@ export const getStartupConfig = (): Promise<config.TStartupConfig> => {
   })
 };
 
-export const getBishengConfig = (): Promise<config.BsConfig> => {
-  return request.get(endpoints.bsConfig()).then(res => res.data);
+const DEFAULT_BS_CONFIG: config.BsConfig = {
+  applicationCenterWelcomeMessage: "com_app_center_welcome",
+  applicationCenterDescription: "com_app_center_description",
+  enable_etl4lm: true,
+  sidebarIcon: {
+    enabled: true,
+    image: "/assets/logo.png"
+  },
+  assistantIcon: {
+    enabled: true,
+    image: "/assets/logo.png"
+  },
+  sidebarSlogan: "com_sidebar_slogan",
+  welcomeMessage: "com_nav_welcome_message",
+  functionDescription: "com_nav_standard_chat_session",
+  inputPlaceholder: "com_nav_input_placeholder",
+  models: [],
+  voiceInput: {
+    enabled: true,
+    model: "whisper-1"
+  },
+  webSearch: {
+    enabled: true,
+    tool: "bing",
+    bingKey: "",
+    bingUrl: "",
+    prompt: "Relevant search results:\n{search_results}\n\nDate: {cur_date}\n\nQuestion: {question}"
+  },
+  knowledgeBase: {
+    enabled: true,
+    prompt: "I have retrieved the following information relevant to your question:\n{retrieved_file_content}\n\nPlease use this context to answer: {question}"
+  },
+  fileUpload: {
+    enabled: true,
+    prompt: "The user has uploaded a file with the following content: {file_content}\n\nQuestion: {question}"
+  },
+  host: '',
+  linsight_invitation_code: false,
+  linsight_cache_dir: "./",
+  waiting_list_url: ""
 };
 
-export const getAIEndpoints = (): Promise<t.TEndpointsConfig> => {
-  // return request.get(endpoints.aiEndpoints());
-  return Promise.resolve({
-    Deepseek: {
-      "order": 9999,
-      "type": "custom",
-      "userProvide": false,
-      "userProvideURL": false,
-      "modelDisplayLabel": "Deepseek"
+export const getBishengConfig = (): Promise<config.BsConfig> => {
+  return request.get(endpoints.bsConfig()).then(res => {
+    const data = res.data;
+    if (!data || !data.models || (Array.isArray(data.models) && data.models.length === 0)) {
+      return {
+        ...DEFAULT_BS_CONFIG,
+        ...data,
+        models: (data?.models && data.models.length > 0) ? data.models : DEFAULT_BS_CONFIG.models,
+        webSearch: { ...DEFAULT_BS_CONFIG.webSearch, ...data?.webSearch },
+        knowledgeBase: { ...DEFAULT_BS_CONFIG.knowledgeBase, ...data?.knowledgeBase },
+        fileUpload: { ...DEFAULT_BS_CONFIG.fileUpload, ...data?.fileUpload },
+        sidebarIcon: { ...DEFAULT_BS_CONFIG.sidebarIcon, ...data?.sidebarIcon },
+        assistantIcon: { ...DEFAULT_BS_CONFIG.assistantIcon, ...data?.assistantIcon },
+        voiceInput: { ...DEFAULT_BS_CONFIG.voiceInput, ...data?.voiceInput },
+      };
     }
-  })
+    return data;
+  }).catch(() => {
+    console.warn("Using DEFAULT_BS_CONFIG due to API failure");
+    return DEFAULT_BS_CONFIG;
+  });
+};
+
+export const getAIEndpoints = async (): Promise<t.TEndpointsConfig> => {
+  const modelsConfig = await getModels();
+  const endpointsConfig: t.TEndpointsConfig = {};
+  
+  const endpointLabels: Record<string, string> = {
+    'openAI': 'OpenAI',
+    'azureOpenAI': 'Azure OpenAI',
+    'google': 'Google',
+    'anthropic': 'Anthropic',
+    'custom': 'Custom',
+  };
+
+  Object.keys(modelsConfig).forEach((key, index) => {
+    endpointsConfig[key] = {
+      order: index,
+      type: key as s.EModelEndpoint,
+      modelDisplayLabel: endpointLabels[key] || key,
+      userProvide: false,
+      userProvideURL: false,
+    };
+  });
+
+  return endpointsConfig;
 };
 
 export const getModels = async (): Promise<t.TModelsConfig> => {
-  return Promise.resolve({
-    Deepseek: ["deepseek-chat", "deepseek-coder", "deepseek-reasoner"]
-  })
-  return request.get(endpoints.models());
+  const response = await request.get(endpoints.models());
+  const data = (response as any).data || [];
+  const modelsConfig: t.TModelsConfig = {};
+
+  const typeMap: Record<string, string> = {
+    'openai': 'openAI',
+    'azure_openai': 'azureOpenAI',
+    'zhipu': 'openAI', // Zhipu often uses OpenAI compatible interface
+    'google': 'google',
+    'anthropic': 'anthropic',
+  };
+
+  data.forEach((server: any) => {
+    const endpointKey = typeMap[server.type] || server.type;
+    const llmModels = (server.models || [])
+      .filter((m: any) => m.model_type === 'llm' && m.online)
+      .map((m: any) => m.model_name);
+
+      const currentModels = modelsConfig[endpointKey] || [];
+      modelsConfig[endpointKey] = currentModels.concat(llmModels).filter((item, index, self) => self.indexOf(item) === index);
+  });
+
+  return modelsConfig;
 };
 
 export const getEndpointsConfigOverride = (): Promise<unknown | boolean> => {

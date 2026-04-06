@@ -115,7 +115,7 @@ const ChatForm = ({ isLingsi, setShowCode, readOnly, index = 0 }) => {
         ? "请输入与此案例相似的目标"
         : bsConfig?.linsightConfig?.input_placeholder ||
         localize("com_linsight_input_placeholder")
-      : bsConfig?.inputPlaceholder,
+      : localize(bsConfig?.inputPlaceholder || ""),
   });
 
   const {
@@ -193,7 +193,7 @@ const ChatForm = ({ isLingsi, setShowCode, readOnly, index = 0 }) => {
   });
   const isVisual = useMemo(() => {
     if (!bsConfig?.models || !chatModel?.id) return false;
-    const model = bsConfig.models.find(item => item.id == chatModel.id);
+    const model = bsConfig.models.find(item => String(item.id) === String(chatModel?.id));
     return !!model?.visual;
   }, [bsConfig?.models, chatModel?.id]);
   useEffect(() => {
@@ -373,7 +373,21 @@ const ChatForm = ({ isLingsi, setShowCode, readOnly, index = 0 }) => {
   }, [isLingsi]);
 
   const { data: modelData } = useGetWorkbenchModelsQuery();
-  const showVoice = modelData?.asr_model.id;
+  const availableModels = useMemo(() => {
+    return (modelData?.task_model ?? bsConfig?.models ?? []) as any[];
+  }, [modelData, bsConfig]);
+
+  useEffect(() => {
+    if (availableModels.length > 0 && !chatModel.id) {
+      const defaultModel = availableModels[0];
+      setChatModel({
+        id: defaultModel.id,
+        name: defaultModel.displayName || defaultModel.name,
+      });
+    }
+  }, [availableModels, chatModel.id, setChatModel]);
+
+  const showVoice = modelData?.asr_model?.id;
 
   const [audioOpening] = useRecordingAudioLoading();
   const noModel = useMemo(() => {
@@ -511,7 +525,7 @@ const ChatForm = ({ isLingsi, setShowCode, readOnly, index = 0 }) => {
             accept={accept}
             showVoice={showVoice}
             fileTip={!isLingsi && !isVisual}
-            noUpload={!bsConfig?.fileUpload.enabled}
+            noUpload={!bsConfig?.fileUpload?.enabled}
             disableInputs={disableInputs || audioOpening}
             disabledSearch={isSearch && !isLingsi}
             selectedOrgKbs={selectedOrgKbs}
@@ -598,19 +612,19 @@ const ChatForm = ({ isLingsi, setShowCode, readOnly, index = 0 }) => {
               <ModelSelect
                 disabled={readOnly}
                 value={chatModel.id}
-                options={bsConfig?.models}
+                options={availableModels}
                 onChange={(val) => {
                   setChatModel({
-                    id: Number(val),
+                    id: val,
                     name:
-                      bsConfig?.models?.find((item) => item.id === val)
+                      availableModels?.find((item: any) => String(item.id) === String(val))
                         ?.displayName || "",
                   });
                 }}
               />
             )}
             {/* 知识库 */}
-            {!isLingsi && bsConfig?.knowledgeBase.enabled && (
+            {!isLingsi && bsConfig?.knowledgeBase?.enabled && (
               <ChatKnowledge
                 config={bsConfig}
                 searchType={searchType}
@@ -690,9 +704,9 @@ const ModelSelect = ({
   disabled,
   onChange,
 }: {
-  options?: BsConfig["models"];
+  options?: any[];
   disabled: boolean;
-  value: number;
+  value: string | number;
   onChange: (value: string) => void;
 }) => {
   const label = useMemo(() => {
@@ -718,14 +732,14 @@ const ModelSelect = ({
 
   return (
     <Select
-      value={useMemo(() => value + "", [value])}
+      value={value ? String(value) : ""}
       disabled={disabled}
       onValueChange={onChange}
     >
-      <SelectTrigger className="h-7 rounded-full px-2 bg-white dark:bg-transparent">
-        <div className="flex gap-2">
-          <Rotate3DIcon size="16" />
-          <span className="text-xs font-normal">{label}</span>
+      <SelectTrigger className="h-7 w-fit min-w-[140px] rounded-full px-2 bg-white dark:bg-transparent">
+        <div className="flex gap-2 items-center overflow-hidden">
+          <Rotate3DIcon size="16" className="shrink-0" />
+          <span className="text-xs font-normal truncate max-w-[120px]">{label}</span>
         </div>
       </SelectTrigger>
       <SelectContent className="bg-white">
